@@ -15,4 +15,4 @@ class Post(db.Model):
     user_id=db.Column(db.Integer,db.ForeignKey('user.id'))
 
     def __repr__(self):
-        return '<Post %r>' % (self.body+self.id)
+        return '<Post %r>' % (self.body + '-'+str(self.id))

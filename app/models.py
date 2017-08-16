@@ -1,4 +1,5 @@
 from app import db
+from hashlib import md5
 class User(db.Model):
     id=db.Column(db.Integer,primary_key=True)
     nickname=db.Column(db.String(64),index=True,unique=True)
@@ -19,6 +20,10 @@ class User(db.Model):
             return unicode(self.id) #python 2
         except NameError:
             return str(self.id) #python3
+    def avatar(self,size):
+        return 'http://www.gravatar.com/avatar/'+md5(self.email.encode('utf-8')).hexdigest()+'?d=mm&s='+str(size)
+
+
 
 class Post(db.Model):
     id=db.Column(db.Integer,primary_key=True)

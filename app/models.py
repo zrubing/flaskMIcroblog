@@ -27,6 +27,20 @@ class User(db.Model):
     def avatar(self,size):
         return 'http://www.gravatar.com/avatar/'+md5(self.email.encode('utf-8')).hexdigest()+'?d=mm&s='+str(size)
 
+    @staticmethod
+    def make_unique_nickname(nickname):
+        if User.query.filter_by(nickname=nickname).first()==None:
+            return nickname
+        else:
+            version=2
+            new_nickname=nickname+str(version)
+            while True:
+                hasName=User.query.filter_by(nickname=new_nickname).first()
+                if not hasName:
+                    return new_nickname
+                else:
+                    version+=1
+
 
 
 class Post(db.Model):

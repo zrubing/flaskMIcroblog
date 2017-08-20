@@ -33,9 +33,9 @@ class User(db.Model):
             return nickname
         else:
             version=2
-            new_nickname=nickname+str(version)
             while True:
-                hasName=User.query.filter_by(nickname=new_nickname).first()
+                new_nickname=nickname+str(version)
+                hasName=User.query.filter_by(nickname=new_nickname).first()!=None
                 if not hasName:
                     return new_nickname
                 else:

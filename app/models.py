@@ -9,6 +9,11 @@ class User(db.Model):
     about_me=db.Column(db.String(140))
     last_seen=db.Column(db.DateTime)
 
+    followed=db.relationship('User',
+                             secondary=followers,
+                             primaryjoin=(followers.c.follower_id==id)
+    )
+
 
     def __repr__(self):
         return '<User %r>' % (self.nickname)
@@ -25,7 +30,8 @@ class User(db.Model):
         except NameError:
             return str(self.id) #python3
     def avatar(self,size):
-        return 'http://www.gravatar.com/avatar/'+md5(self.email.encode('utf-8')).hexdigest()+'?d=mm&s='+str(size)
+        return 'http://www.gravatar.com/avatar/'\
+            +md5(self.email.encode('utf-8')).hexdigest()+'?d=mm&s='+str(size)
 
     @staticmethod
     def make_unique_nickname(nickname):
@@ -51,3 +57,8 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<Post %r>' % (self.body + '-'+str(self.id))
+
+followers=db.Table('followers',
+                   db.Column('follower_id',db.Integer,db.ForeignKey('user.id')),
+                   db.Column('followed_id',db.Integer,db.ForeignKey('user.id'))
+)

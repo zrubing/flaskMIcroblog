@@ -1,5 +1,13 @@
 from app import db
 from hashlib import md5
+
+
+followers=db.Table('followers',
+                   db.Column('follower_id',db.Integer,db.ForeignKey('user.id')),
+                   db.Column('followed_id',db.Integer,db.ForeignKey('user.id'))
+)
+
+
 class User(db.Model):
     id=db.Column(db.Integer,primary_key=True)
     nickname=db.Column(db.String(64),index=True,unique=True)
@@ -11,9 +19,10 @@ class User(db.Model):
 
     followed=db.relationship('User',
                              secondary=followers,
-                             primaryjoin=(followers.c.follower_id==id)
-    )
-
+                             primaryjoin=(followers.c.follower_id==id),
+                             secondaryjoin=(followers.c.followed_id==id),
+                             backref=db.backref('followers',lazy='dynamic'),
+                             lazy='dynamic')
 
     def __repr__(self):
         return '<User %r>' % (self.nickname)
@@ -41,7 +50,8 @@ class User(db.Model):
             version=2
             while True:
                 new_nickname=nickname+str(version)
-                hasName=User.query.filter_by(nickname=new_nickname).first()!=None
+                hasName=User.query.filter_by\
+                         (nickname=new_nickname).first()!=None
                 if not hasName:
                     return new_nickname
                 else:
@@ -57,8 +67,3 @@ class Post(db.Model):
 
     def __repr__(self):
         return '<Post %r>' % (self.body + '-'+str(self.id))
-
-followers=db.Table('followers',
-                   db.Column('follower_id',db.Integer,db.ForeignKey('user.id')),
-                   db.Column('followed_id',db.Integer,db.ForeignKey('user.id'))
-)

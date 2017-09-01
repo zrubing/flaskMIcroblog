@@ -1,16 +1,24 @@
 from app import app,lm,db,oid
 from flask import render_template,flash,redirect,session,url_for,request,g
-from .forms import LoginForm,EditForm
+from .forms import LoginForm,EditForm,PostForm
 from flask_login import login_user,logout_user,current_user,login_required
-from .models import User
+from .models import User,Post
 from datetime import datetime
 
 
-@app.route("/")
+@app.route("/",methods=['GET','POST'])
 @app.route("/index")
 @login_required
 def index():
     user=g.user
+    form=PostForm()
+    if form.validate_on_submit():
+        post=Post(body=form.post.data,timestamp=datetime.utcnow(),author=g.user)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post is now alive')
+        return redirect(url_for('index'))
+
     posts=[
         {
             'author':{'nickname':'John'},
@@ -21,7 +29,8 @@ def index():
             'author':{'nickname':'khan'},
             'body':'good boy'
         }]
-    return render_template('index.html',title='home',user=user,posts=posts)
+    return render_template('index.html',title='home',\
+                           form=form,user=user,posts=posts)
 
 @app.route('/login',methods=['GET','POST'])
 @oid.loginhandler
